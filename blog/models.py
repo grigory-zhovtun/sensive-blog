@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery
 
 
 
@@ -10,6 +10,25 @@ class PostQuerySet(models.QuerySet):
     def year(self, year):
         posts_at_year = self.filter(published_at__year=year).order_by('published_at')
         return posts_at_year
+
+    def popular(self):
+        return self.annotate(likes_count=Count('likes')).order_by('-likes_count')
+
+    def fetch_with_comments_count(self):
+        # Добавляет к постам количество комментариев через подзапрос (Subquery).
+        #
+        # Если использовать обычный annotate с Count('comments'), то при наличии
+        # в запросе другого annotate с Count (например, Count('likes')), Django
+        # создаст два LEFT OUTER JOIN. Это приводит к декартову произведению
+        comments_count_subquery = Comment.objects.filter(
+            post=OuterRef('pk')
+        ).order_by().values('post').annotate(
+            count=Count('pk')
+        ).values('count')
+
+        return self.annotate(
+            comments_count=Subquery(comments_count_subquery)
+        )
 
 
 class Post(models.Model):
