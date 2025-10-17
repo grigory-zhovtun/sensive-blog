@@ -5,6 +5,7 @@ from django.db.models import Count, Prefetch
 
 
 def serialize_post_optimized(post):
+    tags = post.tags.all()
     return {
         'title': post.title,
         'teaser_text': post.text[:200],
@@ -14,7 +15,7 @@ def serialize_post_optimized(post):
         'published_at': post.published_at,
         'slug': post.slug,
         'tags': [serialize_tag_optimized(tag) for tag in post.tags.all()],
-        'first_tag_title': post.tags.all()[0].title,
+        'first_tag_title': tags[0].title if tags else '',
     }
 
 
@@ -149,7 +150,3 @@ def contacts(request):
     # позже здесь будет код для статистики заходов на эту страницу
     # и для записи фидбека
     return render(request, 'contacts.html', {})
-
-
-def get_likes_count(post):
-    return post.likes_count
