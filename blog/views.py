@@ -75,13 +75,14 @@ def post_detail(request, slug):
     ).get(slug=slug)
 
     comments = Comment.objects.filter(post=post).select_related('author')
-    serialized_comments = []
-    for comment in comments:
-        serialized_comments.append({
+    serialized_comments = [
+        {
             'text': comment.text,
             'published_at': comment.published_at,
             'author': comment.author.username,
-        })
+        }
+        for comment in comments
+    ]
 
     related_tags = post.tags.all()
 
