@@ -143,7 +143,7 @@ def tag_filter(request, tag_title):
 
     most_popular_tags = Tag.objects.popular()[:5]
 
-    most_popular_posts = []  # TODO. Как это посчитать?
+    most_popular_posts = get_most_popular_posts()
 
     tags_prefetch = Prefetch(
         'tags',
