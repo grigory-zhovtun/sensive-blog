@@ -26,7 +26,7 @@ def serialize_tag_optimized(tag):
     }
 
 
-def create_prefetch_tags():
+def get_tags_prefetch():
     return Prefetch(
         'tags',
         queryset=Tag.objects.annotate(posts_count=Count('posts'))
@@ -36,11 +36,11 @@ def get_most_popular_posts():
     return Post.objects.popular() \
         .fetch_with_comments_count() \
         .prefetch_related('author') \
-        .prefetch_related(create_prefetch_tags())[:5]
+        .prefetch_related(get_tags_prefetch())[:5]
 
 
 def index(request):
-    tags_prefetch = create_prefetch_tags()
+    tags_prefetch = get_tags_prefetch()
 
     most_popular_posts = Post.objects.popular() \
         .fetch_with_comments_count() \
@@ -71,7 +71,7 @@ def post_detail(request, slug):
     post = Post.objects.annotate(
         likes_count=Count('likes')
     ).prefetch_related(
-        create_prefetch_tags(), 'author'
+        get_tags_prefetch(), 'author'
     ).get(slug=slug)
 
     comments = Comment.objects.filter(post=post).select_related('author')
@@ -119,7 +119,7 @@ def tag_filter(request, tag_title):
 
     related_posts = tag.posts \
         .fetch_with_comments_count() \
-        .prefetch_related('author', create_prefetch_tags()) \
+        .prefetch_related('author', get_tags_prefetch()) \
         .all()[:20]
 
     context = {
