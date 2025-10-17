@@ -46,6 +46,18 @@ def serialize_tag_optimized(tag):
     }
 
 
+def get_most_popular_posts():
+    tags_prefetch = Prefetch(
+        'tags',
+        queryset=Tag.objects.annotate(posts_count=Count('posts'))
+    )
+
+    return Post.objects.popular() \
+        .fetch_with_comments_count() \
+        .prefetch_related('author') \
+        .prefetch_related(tags_prefetch)[:5]
+
+
 def index(request):
     tags_prefetch = Prefetch(
         'tags',
@@ -114,7 +126,7 @@ def post_detail(request, slug):
 
     most_popular_tags = Tag.objects.popular()[:5]
 
-    most_popular_posts = []  # TODO. Как это посчитать?
+    most_popular_posts = get_most_popular_posts()
 
     context = {
         'post': serialized_post,
