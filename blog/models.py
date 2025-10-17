@@ -1,8 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Count, OuterRef, Subquery
-
+from django.db.models import Count, OuterRef, Subquery, Prefetch
 
 
 class PostQuerySet(models.QuerySet):
@@ -29,6 +28,13 @@ class PostQuerySet(models.QuerySet):
         return self.annotate(
             comments_count=Subquery(comments_count_subquery)
         )
+
+    def with_related(self):
+        tags_prefetch = Prefetch(
+            'tags',
+            queryset=Tag.objects.annotate(posts_count=Count('posts'))
+        )
+        return self.select_related('author').prefetch_related(tags_prefetch)
 
 
 class Post(models.Model):
