@@ -71,7 +71,7 @@ def post_detail(request, slug):
         slug=slug
     )
 
-    comments = Comment.objects.filter(post=post).select_related('author')
+    comments = post.comments.select_related('author')
     serialized_comments = [
         {
             'text': comment.text,
