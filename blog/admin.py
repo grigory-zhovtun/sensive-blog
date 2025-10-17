@@ -6,6 +6,8 @@ from blog.models import Post, Tag, Comment
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ['title', 'author', 'published_at']
+    raw_id_fields = ['author', 'likes', 'tags']
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -15,3 +17,4 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['post', 'author', 'published_at']
+    raw_id_fields = ['post', 'author']
